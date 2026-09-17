@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { site, process as steps } from "@/content/site";
+import { site, bookingProcess as steps } from "@/content/site";
 import { ServiceIcon, IconCheck, IconArrow, IconPhone } from "./Icons";
 import type { Service } from "@/content/site";
 

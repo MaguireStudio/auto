@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, type FormEvent } from "react";
+import { useState, useMemo, useRef, type FormEvent } from "react";
 import { usePathname } from "next/navigation";
 import { site, services } from "@/content/site";
 import {
@@ -48,6 +48,8 @@ export default function LeadForm({ defaultService }: { defaultService?: string }
   const [submitting, setSubmitting] = useState(false);
   const [reference, setReference] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const headingRef = useRef<HTMLParagraphElement>(null);
+  const [errorSummary, setErrorSummary] = useState<string | null>(null);
 
   const set = <K extends keyof State>(key: K, value: State[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -102,16 +104,46 @@ export default function LeadForm({ defaultService }: { defaultService?: string }
     }
 
     setErrors(e);
-    return Object.keys(e).length === 0;
+
+    const ok = Object.keys(e).length === 0;
+    if (!ok) {
+      const count = Object.keys(e).length;
+      setFormError(null);
+      setErrorSummary(
+        `${count} ${count === 1 ? "field needs" : "fields need"} attention before you continue.`,
+      );
+      requestAnimationFrame(() => headingRef.current?.focus());
+    } else {
+      setErrorSummary(null);
+    }
+    return ok;
+  };
+
+  /**
+   * Moves to a step, scrolls the form into view, and puts focus on the step
+   * heading. Without the focus move a screen-reader or keyboard user stays
+   * parked on the Continue button while the content behind them changes.
+   */
+  const goToStep = (index: number) => {
+    setStep(index);
+
+    const form = document.getElementById("lead-form");
+    if (form) {
+      // Offset for the sticky header so the progress bar isn't hidden under it.
+      const top = form.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+
+    // After paint, so the new step's heading exists to receive focus.
+    requestAnimationFrame(() => headingRef.current?.focus());
   };
 
   const next = () => {
     if (!validateStep(step)) return;
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
-    window.scrollTo({ top: document.getElementById("lead-form")?.offsetTop ?? 0 - 100, behavior: "smooth" });
+    goToStep(Math.min(step + 1, STEPS.length - 1));
   };
 
-  const back = () => setStep((s) => Math.max(s - 1, 0));
+  const back = () => goToStep(Math.max(step - 1, 0));
 
   const onSubmit = async (ev: FormEvent) => {
     ev.preventDefault();
@@ -197,12 +229,20 @@ export default function LeadForm({ defaultService }: { defaultService?: string }
       {/* Progress */}
       <div className="border-b border-ink-100 bg-ink-50 px-6 py-5 md:px-8">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-ink-950">
+          <p
+            ref={headingRef}
+            tabIndex={-1}
+            aria-live="polite"
+            className="text-sm font-semibold text-ink-950 outline-none"
+          >
             Step {step + 1} of {STEPS.length}
             <span className="ml-2 font-normal text-ink-500">{STEPS[step]}</span>
           </p>
           <p className="text-xs text-ink-500">Takes about 60 seconds</p>
         </div>
+        <p role="alert" className="mt-2 min-h-0 text-sm font-medium text-red-600 empty:mt-0">
+          {errorSummary ?? ""}
+        </p>
         <div
           className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-200"
           role="progressbar"

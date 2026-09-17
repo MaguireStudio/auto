@@ -19,13 +19,22 @@ export function middleware(req: NextRequest) {
   const header = req.headers.get("authorization");
 
   if (header?.startsWith("Basic ")) {
-    const decoded = atob(header.slice(6));
-    const sep = decoded.indexOf(":");
-    const givenUser = decoded.slice(0, sep);
-    const givenPass = decoded.slice(sep + 1);
+    try {
+      const decoded = atob(header.slice(6));
+      const sep = decoded.indexOf(":");
+      // No colon means a malformed credential, not a a username with an empty
+      // password — reject rather than comparing against a truncated string.
+      if (sep !== -1) {
+        const givenUser = decoded.slice(0, sep);
+        const givenPass = decoded.slice(sep + 1);
 
-    if (safeEqual(givenUser, user) && safeEqual(givenPass, password)) {
-      return NextResponse.next();
+        if (safeEqual(givenUser, user) && safeEqual(givenPass, password)) {
+          return NextResponse.next();
+        }
+      }
+    } catch {
+      // atob() throws on malformed base64. Fall through to the 401 challenge
+      // below rather than surfacing a 500 to anyone who sends a bad header.
     }
   }
 

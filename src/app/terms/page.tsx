@@ -77,13 +77,27 @@ export default function TermsPage() {
           <h2 className="mt-10 text-2xl font-extrabold">Contact</h2>
           <p>
             Questions about these terms: {site.phone} or{" "}
-            <a href={`mailto:${site.email}`} className="font-semibold text-volt-700 underline">
-              {site.email}
-            </a>
+            <ContactLink />
             .
           </p>
         </div>
       </Section>
     </>
+  );
+}
+
+/** Email address when one is confirmed, otherwise the phone number. */
+function ContactLink() {
+  if (site.email) {
+    return (
+      <a href={`mailto:${site.email}`} className="font-semibold text-volt-700 underline">
+        {site.email}
+      </a>
+    );
+  }
+  return (
+    <a href={site.phoneHref} className="font-semibold text-volt-700 underline">
+      {site.phone}
+    </a>
   );
 }

@@ -30,7 +30,7 @@ export function localBusinessSchema() {
     description: site.shortDescription,
     url: site.url,
     telephone: site.phone,
-    email: site.email,
+    ...(site.email ? { email: site.email } : {}),
     foundingDate: String(site.foundedYear),
     address: {
       "@type": "PostalAddress",

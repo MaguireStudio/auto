@@ -2,13 +2,13 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   site,
+  services,
   popularServices,
   residentialServices,
   commercialServices,
   serviceArea,
   generalFaqs,
   testimonials,
-  testimonialsArePlaceholder,
 } from "@/content/site";
 import {
   Section,
@@ -56,9 +56,13 @@ export default function HomePage() {
         <div className="container-x relative py-20 md:py-28">
           <div className="grid items-center gap-14 lg:grid-cols-[1.15fr_1fr]">
             <div>
+              {/* Only claims a credential when site.credentials confirms it.
+                  Otherwise falls back to a fact we can stand behind. */}
               <p className="inline-flex items-center gap-2 rounded-full border border-ink-800 bg-ink-900/60 px-3.5 py-1.5 text-xs font-semibold text-volt-400">
                 <IconBolt className="h-3.5 w-3.5" strokeWidth={2.2} />
-                Licensed &amp; insured in Kentucky
+                {site.credentials.insured
+                  ? "Licensed & insured in Kentucky"
+                  : `Serving Murray & Calloway County since ${site.foundedYear}`}
               </p>
 
               <h1 className="mt-6 text-4xl font-extrabold leading-[1.05] text-white sm:text-5xl lg:text-[3.4rem]">
@@ -139,7 +143,11 @@ export default function HomePage() {
           <Stat value={`${yearsInBusiness}+`} label="Years serving West Kentucky" />
           <Stat value={`${serviceArea.radiusMiles} mi`} label="Service radius from Murray" />
           <Stat value="5" label="Counties covered" />
-          <Stat value="100%" label="Licensed &amp; insured" />
+          {site.credentials.insured ? (
+            <Stat value="100%" label="Licensed &amp; insured" />
+          ) : (
+            <Stat value={String(services.length)} label="Services offered" />
+          )}
         </div>
       </div>
 
@@ -290,40 +298,34 @@ export default function HomePage() {
       </Section>
 
       {/* ---------------- Testimonials ---------------- */}
-      <Section muted>
-        <SectionHead eyebrow="Reviews" title="What customers say" center />
-        {testimonialsArePlaceholder && (
-          <p className="mx-auto mt-6 max-w-2xl rounded-lg border border-amber-300 bg-amber-50 p-4 text-center text-sm text-amber-900">
-            <strong>Placeholder content.</strong> Replace these with real reviews in{" "}
-            <code className="font-mono">src/content/site.ts</code> and set{" "}
-            <code className="font-mono">testimonialsArePlaceholder</code> to{" "}
-            <code className="font-mono">false</code> to remove this notice. Never publish invented
-            testimonials.
-          </p>
-        )}
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <figure key={i} className="flex flex-col rounded-xl border border-ink-100 bg-white p-6">
-              <div className="flex gap-0.5 text-volt-500" aria-label="5 out of 5 stars">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <svg key={j} viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
-                    <path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                  </svg>
-                ))}
-              </div>
-              <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
-                &ldquo;{t.quote}&rdquo;
-              </blockquote>
-              <figcaption className="mt-5 border-t border-ink-100 pt-4 text-sm">
-                <span className="font-semibold text-ink-950">{t.name}</span>
-                <span className="block text-ink-500">
-                  {t.location} · {t.service}
-                </span>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </Section>
+      {/* Renders only when real reviews exist — see `testimonials` in site.ts. */}
+      {testimonials.length > 0 && (
+        <Section muted>
+          <SectionHead eyebrow="Reviews" title="What customers say" center />
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {testimonials.map((t, i) => (
+              <figure key={i} className="flex flex-col rounded-xl border border-ink-100 bg-white p-6">
+                <div className="flex gap-0.5 text-volt-500" aria-label="5 out of 5 stars">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <svg key={j} viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                      <path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
+                    </svg>
+                  ))}
+                </div>
+                <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <figcaption className="mt-5 border-t border-ink-100 pt-4 text-sm">
+                  <span className="font-semibold text-ink-950">{t.name}</span>
+                  <span className="block text-ink-500">
+                    {t.location} · {t.service}
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* ---------------- FAQ ---------------- */}
       <Section>

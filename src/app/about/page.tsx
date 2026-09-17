@@ -45,15 +45,14 @@ export default function AboutPage() {
             <p>
               We&apos;re also honest about what you don&apos;t need. If the fix is a twenty-dollar
               breaker instead of a service upgrade, we&apos;ll tell you that, even though it&apos;s
-              the smaller ticket. That&apos;s worked out fine for us so far — most of our work comes
-              from people we&apos;ve already helped.
+              the smaller ticket. We would rather be the company you call again than the one that
+              got one big invoice out of you.
             </p>
 
             <h2 className="mt-12 text-2xl font-extrabold">How we work</h2>
             <div className="mt-6">
               <CheckList
                 items={[
-                  "Licensed, bonded, and insured in the Commonwealth of Kentucky",
                   "Written, approved pricing before any work begins",
                   "Permits pulled and inspections met wherever code requires it",
                   "Labeled panels and documented circuits when we leave",

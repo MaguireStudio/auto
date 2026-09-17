@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { site, testimonials, testimonialsArePlaceholder } from "@/content/site";
+import { site, testimonials } from "@/content/site";
 import { PageHero, Section, SectionHead, CTABand } from "@/components/ui";
 import { IconInstagram, IconFacebook, IconArrow } from "@/components/Icons";
 
@@ -15,44 +15,53 @@ export default function ReviewsPage() {
       <PageHero
         eyebrow="Reviews"
         title="What our customers say"
-        lead="Most of our work comes from referrals and repeat customers. Here's what they tell us — and where to read more."
+        lead={
+          testimonials.length > 0
+            ? "What customers around Murray and Calloway County tell us about the work."
+            : "Where to read what customers say about us, and how to leave one yourself."
+        }
       />
 
       <Section>
-        {testimonialsArePlaceholder && (
-          <div className="mb-10 rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-relaxed text-amber-900">
-            <strong>Placeholder content — do not launch with this.</strong> Replace the{" "}
-            <code className="font-mono">testimonials</code> array in{" "}
-            <code className="font-mono">src/content/site.ts</code> with real, attributable reviews
-            you have permission to publish, then set{" "}
-            <code className="font-mono">testimonialsArePlaceholder</code> to{" "}
-            <code className="font-mono">false</code>. Publishing invented reviews is an FTC
-            violation and will cost you more than it earns.
+        {testimonials.length === 0 ? (
+          /* Honest empty state. Better than inventing quotes, and it still
+             gives the visitor somewhere real to go and read about the work. */
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-2xl font-extrabold">Reviews are on our social pages</h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-ink-600">
+              We haven&apos;t collected our reviews onto this page yet. In the meantime, the
+              Facebook and Instagram pages below are where customers have left them, and where we
+              post the work itself — finished panels, rough-ins, and jobs in progress.
+            </p>
+            <p className="mt-4 text-[15px] leading-relaxed text-ink-600">
+              If we&apos;ve done work for you and you&apos;d be willing to leave one, it genuinely
+              helps — a local trade business lives on them.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {testimonials.map((t, i) => (
+              <figure key={i} className="flex flex-col rounded-xl border border-ink-100 bg-white p-7">
+                <div className="flex gap-0.5 text-volt-500" aria-label="5 out of 5 stars">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <svg key={j} viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
+                      <path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
+                    </svg>
+                  ))}
+                </div>
+                <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <figcaption className="mt-6 border-t border-ink-100 pt-4 text-sm">
+                  <span className="font-semibold text-ink-950">{t.name}</span>
+                  <span className="block text-ink-500">
+                    {t.location} · {t.service}
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         )}
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <figure key={i} className="flex flex-col rounded-xl border border-ink-100 bg-white p-7">
-              <div className="flex gap-0.5 text-volt-500" aria-label="5 out of 5 stars">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <svg key={j} viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
-                    <path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                  </svg>
-                ))}
-              </div>
-              <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
-                &ldquo;{t.quote}&rdquo;
-              </blockquote>
-              <figcaption className="mt-6 border-t border-ink-100 pt-4 text-sm">
-                <span className="font-semibold text-ink-950">{t.name}</span>
-                <span className="block text-ink-500">
-                  {t.location} · {t.service}
-                </span>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
       </Section>
 
       <Section muted>

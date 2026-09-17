@@ -42,11 +42,16 @@ export const metadata: Metadata = {
     title: `${site.name} | Electricians in Murray, KY`,
     description: site.shortDescription,
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large" },
-  },
+  // Refuse to be indexed until a real domain is configured. Without this a
+  // preview deploy gets crawled with canonical tags pointing at a domain that
+  // doesn't exist, which is a genuinely painful thing to undo.
+  robots: site.domainConfigured
+    ? {
+        index: true,
+        follow: true,
+        googleBot: { index: true, follow: true, "max-image-preview": "large" },
+      }
+    : { index: false, follow: false },
   alternates: { canonical: "/" },
 };
 

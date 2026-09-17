@@ -32,16 +32,30 @@ export default function ContactPage() {
             <p className="mt-4 text-xl font-extrabold text-volt-700">{site.phone}</p>
           </a>
 
-          <a href={`mailto:${site.email}`} className="card group p-7 transition-colors hover:border-volt-300">
-            <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-volt-50 text-volt-700 ring-1 ring-volt-100">
-              <IconMail className="h-5 w-5" />
-            </span>
-            <h2 className="mt-5 text-lg font-bold text-ink-950">Email us</h2>
-            <p className="mt-2 text-[15px] leading-relaxed text-ink-600">
-              Good for plans, invoices, insurance certificates, and anything with an attachment.
-            </p>
-            <p className="mt-4 break-all font-semibold text-volt-700">{site.email}</p>
-          </a>
+          {site.email ? (
+            <a href={`mailto:${site.email}`} className="card group p-7 transition-colors hover:border-volt-300">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-volt-50 text-volt-700 ring-1 ring-volt-100">
+                <IconMail className="h-5 w-5" />
+              </span>
+              <h2 className="mt-5 text-lg font-bold text-ink-950">Email us</h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-ink-600">
+                Good for plans, invoices, insurance certificates, and anything with an attachment.
+              </p>
+              <p className="mt-4 break-all font-semibold text-volt-700">{site.email}</p>
+            </a>
+          ) : (
+            <a href={site.smsHref} className="card group p-7 transition-colors hover:border-volt-300">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-volt-50 text-volt-700 ring-1 ring-volt-100">
+                <IconPhone className="h-5 w-5" />
+              </span>
+              <h2 className="mt-5 text-lg font-bold text-ink-950">Send a text</h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-ink-600">
+                Good for a quick question or a photo of the problem when calling isn&apos;t
+                convenient.
+              </p>
+              <p className="mt-4 font-semibold text-volt-700">{site.phone}</p>
+            </a>
+          )}
 
           <Link href="/request-service" className="card group p-7 transition-colors hover:border-volt-300">
             <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-volt-50 text-volt-700 ring-1 ring-volt-100">

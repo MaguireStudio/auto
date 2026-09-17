@@ -4,6 +4,7 @@ import { IconBolt, IconPhone, IconMail, IconPin, IconInstagram, IconFacebook } f
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const credentialLine = buildCredentialLine();
 
   return (
     <footer className="mt-24 bg-ink-950 text-ink-300">
@@ -17,11 +18,9 @@ export default function Footer() {
               <span className="text-[17px] font-extrabold tracking-tight text-white">{site.name}</span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed">{site.shortDescription}</p>
-            <p className="mt-4 text-xs leading-relaxed text-ink-500">
-              {site.insuranceNote}
-              <br />
-              {site.licenseNumber}
-            </p>
+            {credentialLine && (
+              <p className="mt-4 text-xs leading-relaxed text-ink-500">{credentialLine}</p>
+            )}
             <div className="mt-5 flex gap-2">
               <a
                 href={site.social.instagram}
@@ -87,12 +86,14 @@ export default function Footer() {
                   <span className="font-semibold text-white">{site.phone}</span>
                 </a>
               </li>
-              <li>
-                <a href={`mailto:${site.email}`} className="flex items-start gap-3 hover:text-volt-400">
-                  <IconMail className="mt-0.5 h-4 w-4 shrink-0 text-volt-500" />
-                  <span className="break-all">{site.email}</span>
-                </a>
-              </li>
+              {site.email && (
+                <li>
+                  <a href={`mailto:${site.email}`} className="flex items-start gap-3 hover:text-volt-400">
+                    <IconMail className="mt-0.5 h-4 w-4 shrink-0 text-volt-500" />
+                    <span className="break-all">{site.email}</span>
+                  </a>
+                </li>
+              )}
               <li className="flex items-start gap-3">
                 <IconPin className="mt-0.5 h-4 w-4 shrink-0 text-volt-500" />
                 <span>
@@ -142,4 +143,26 @@ export default function Footer() {
       </div>
     </footer>
   );
+}
+
+/**
+ * Builds the license/insurance line from confirmed credentials only.
+ * Returns null when nothing is confirmed, so the footer prints no claim at
+ * all rather than an unverifiable one. See `site.credentials`.
+ */
+function buildCredentialLine(): string | null {
+  const { licenseNumber, insured, bonded } = site.credentials;
+  const status: string[] = [];
+  if (insured) status.push("insured");
+  if (bonded) status.push("bonded");
+
+  const parts: string[] = [];
+  if (status.length) {
+    parts.push(
+      `Licensed, ${status.join(" and ")} in the Commonwealth of Kentucky.`,
+    );
+  }
+  if (licenseNumber) parts.push(`KY License #${licenseNumber}`);
+
+  return parts.length ? parts.join(" ") : null;
 }

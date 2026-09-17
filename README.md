@@ -38,20 +38,32 @@ Needs confirmation: the street address, email, domain, exact office hours
 (listings disagree about Friday/Saturday), the Kentucky license number,
 whether emergency service is offered, and the full service-area list.
 
-### 2. Placeholder content that must not ship
+### 2. Claims the site deliberately withholds
 
-- **Testimonials** in `src/content/site.ts` are labelled placeholders. Replace
-  them with real, attributable reviews, then set `testimonialsArePlaceholder`
-  to `false`. An on-page warning banner shows until you do. Publishing invented
-  reviews is an FTC violation.
-- **License number** — `site.licenseNumber` is `#ME00000`. Kentucky requires
-  the real license number on advertising.
-- **About page** — the three body paragraphs are generic. This is the highest
-  -value page to rewrite in the owner's own words.
+Rather than shipping placeholders that someone might publish by accident, the
+site **omits these claims entirely until they are confirmed.** Nothing is
+fabricated anywhere on the live pages. To turn each one on, fill it in:
+
+| What's withheld | Where to set it | What happens now |
+| --- | --- | --- |
+| License number | `site.credentials.licenseNumber` | No license claim is printed anywhere |
+| "Licensed & insured" | `site.credentials.insured` / `.bonded` | Hero badge falls back to "Serving Murray since 2016"; the stat falls back to a service count |
+| Email address | `site.email` | Every email link is hidden; visitors are shown the phone number instead |
+| Testimonials | `site.testimonials` | Review sections hide themselves; `/reviews` shows an honest "reviews are on our social pages" state |
+| Real domain | `NEXT_PUBLIC_SITE_URL` | Site serves `noindex` + `Disallow: /` so a preview can't be crawled with wrong canonicals |
+| After-hours service | `site.afterHoursNote` | No after-hours promise is made (the "call us, don't wait on the form" banner stays — that's safe advice regardless) |
+
+This matters legally, not just cosmetically: KRS 227A requires the real license
+number on electrical contractor advertising, an unsupported "bonded and
+insured" claim is a deceptive trade practice, and fabricated reviews violate
+the FTC Act (16 CFR Part 465, which carries civil penalties per violation).
+
+Still needs a human regardless:
+
+- **The About page** body copy is generic. It's the highest-value page to
+  rewrite in the owner's own words.
 - **Privacy policy and terms** are plain-language starting points, not legal
   advice. Have them reviewed, especially the SMS consent language (TCPA).
-
----
 
 ## Getting started
 

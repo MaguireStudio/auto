@@ -69,11 +69,19 @@ export default function CareersPage() {
                 Send us your experience and your license status. No formal application, no portal —
                 just tell us what you&apos;ve worked on.
               </p>
-              <a href={`mailto:${site.email}?subject=Application`} className="btn btn-primary mt-5 w-full text-sm">
-                <IconMail className="h-4 w-4" />
-                Email us
-              </a>
-              <a href={site.phoneHref} className="btn btn-outline mt-2.5 w-full text-sm">
+              {site.email && (
+                <a
+                  href={`mailto:${site.email}?subject=Application`}
+                  className="btn btn-primary mt-5 w-full text-sm"
+                >
+                  <IconMail className="h-4 w-4" />
+                  Email us
+                </a>
+              )}
+              <a
+                href={site.phoneHref}
+                className={`btn ${site.email ? "btn-outline mt-2.5" : "btn-primary mt-5"} w-full text-sm`}
+              >
                 <IconPhone className="h-4 w-4" />
                 {site.phone}
               </a>

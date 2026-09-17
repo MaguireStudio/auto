@@ -237,8 +237,20 @@ const hits = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
 
+/** Drops expired entries so the Map cannot grow without bound. */
+function sweepExpired(now: number): void {
+  for (const [k, v] of hits) {
+    if (now > v.resetAt) hits.delete(k);
+  }
+}
+
 export function rateLimit(key: string): { ok: boolean; retryAfter: number } {
   const now = Date.now();
+
+  // Cheap amortized cleanup: without this, every distinct client IP stays
+  // resident for the lifetime of the process.
+  if (hits.size > 500) sweepExpired(now);
+
   const entry = hits.get(key);
 
   if (!entry || now > entry.resetAt) {

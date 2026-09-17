@@ -74,9 +74,7 @@ export default function PrivacyPage() {
           <p>
             You can ask us what we have about you, ask us to correct it, or ask us to delete it.
             Call {site.phone} or email{" "}
-            <a href={`mailto:${site.email}`} className="font-semibold text-volt-700 underline">
-              {site.email}
-            </a>{" "}
+            <ContactLink />{" "}
             and we&apos;ll take care of it. We may keep records we are required to keep for tax,
             permitting, or warranty reasons.
           </p>
@@ -97,12 +95,26 @@ export default function PrivacyPage() {
             {site.address.street}, {site.address.city}, {site.address.state} {site.address.zip}
             <br />
             {site.phone} ·{" "}
-            <a href={`mailto:${site.email}`} className="font-semibold text-volt-700 underline">
-              {site.email}
-            </a>
+            <ContactLink />
           </p>
         </div>
       </Section>
     </>
+  );
+}
+
+/** Email address when one is confirmed, otherwise the phone number. */
+function ContactLink() {
+  if (site.email) {
+    return (
+      <a href={`mailto:${site.email}`} className="font-semibold text-volt-700 underline">
+        {site.email}
+      </a>
+    );
+  }
+  return (
+    <a href={site.phoneHref} className="font-semibold text-volt-700 underline">
+      {site.phone}
+    </a>
   );
 }

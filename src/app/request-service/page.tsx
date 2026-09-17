@@ -90,12 +90,14 @@ export default function RequestServicePage() {
                     {site.phone}
                   </a>
                 </li>
-                <li>
-                  <a href={`mailto:${site.email}`} className="flex items-center gap-3 text-ink-700 hover:text-volt-700">
-                    <IconMail className="h-4 w-4 shrink-0 text-volt-600" />
-                    <span className="break-all">{site.email}</span>
-                  </a>
-                </li>
+                {site.email && (
+                  <li>
+                    <a href={`mailto:${site.email}`} className="flex items-center gap-3 text-ink-700 hover:text-volt-700">
+                      <IconMail className="h-4 w-4 shrink-0 text-volt-600" />
+                      <span className="break-all">{site.email}</span>
+                    </a>
+                  </li>
+                )}
                 <li className="flex items-start gap-3 text-ink-600">
                   <IconClock className="mt-0.5 h-4 w-4 shrink-0 text-volt-600" />
                   <span>

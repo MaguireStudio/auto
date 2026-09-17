@@ -14,6 +14,29 @@
  * are marked CONFIRM and should be replaced with real content.
  */
 
+/**
+ * Canonical origin for canonical tags, sitemap.xml, robots.txt, and JSON-LD.
+ *
+ * Resolution order:
+ *   1. NEXT_PUBLIC_SITE_URL — set this to the real domain once you have one.
+ *   2. Vercel's production domain, so a deploy is self-consistent for free.
+ *   3. A placeholder, with `configured: false` so the site self-noindexes.
+ */
+const SITE_URL: { href: string; configured: boolean } = (() => {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
+  if (explicit) {
+    return { href: explicit.replace(/\/+$/, ""), configured: true };
+  }
+
+  const vercelDomain =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  if (vercelDomain) {
+    return { href: `https://${vercelDomain}`, configured: true };
+  }
+
+  return { href: "http://localhost:3000", configured: false };
+})();
+
 export const site = {
   // ---- Identity ------------------------------------------------------- //
   name: "NORS Electric", // VERIFIED
@@ -22,9 +45,17 @@ export const site = {
   shortDescription:
     "Residential and commercial electrical service, repair, and installation in Murray, Kentucky and the surrounding counties.",
 
-  // Set this to the real domain before launch. Used for canonical URLs,
-  // sitemap.xml, robots.txt and Open Graph tags.
-  url: "https://www.norselectricky.com", // CONFIRM
+  // Resolved from the environment — see `resolveSiteUrl` at the bottom of this
+  // file. Set NEXT_PUBLIC_SITE_URL to the real domain, or let Vercel supply it.
+  url: SITE_URL.href,
+
+  /**
+   * False when no real domain is configured yet. The layout sets `noindex`
+   * while this is false, so a preview deploy can never get indexed with
+   * canonical URLs pointing at a domain nobody owns — which is far harder to
+   * undo than it is to avoid.
+   */
+  domainConfigured: SITE_URL.configured,
 
   foundedYear: 2016, // VERIFIED (listings report ~9 years in business)
 
@@ -32,7 +63,10 @@ export const site = {
   phone: "(270) 293-0069", // VERIFIED
   phoneHref: "tel:+12702930069", // VERIFIED
   smsHref: "sms:+12702930069",
-  email: "office@norselectricky.com", // CONFIRM
+  // NULL UNTIL CONFIRMED: a mailto: link to an address that doesn't exist
+  // bounces silently and loses the customer. Every email link and address on
+  // the site is hidden while this is null, and the phone number shown instead.
+  email: null as string | null,
   address: {
     street: "121 Wildwood Dr", // CONFIRM — listed publicly, verify it is the mailing address
     city: "Murray",
@@ -53,11 +87,34 @@ export const site = {
     { day: "Sunday", open: null, close: null },
   ], // CONFIRM
 
-  emergencyService: true, // CONFIRM — does NORS take after-hours emergency calls?
-  emergencyNote: "After-hours and emergency calls answered for existing and new customers.", // CONFIRM
+  // Urging people to phone rather than wait on a form for a live hazard is
+  // safe advice regardless of whether after-hours service is offered, so the
+  // banner is on by default. Set `afterHoursNote` only if NORS really does
+  // answer calls outside office hours — otherwise it is a promise you'd break.
+  emergencyService: true,
+  afterHoursNote: null as string | null, // e.g. "After-hours calls answered for existing customers."
 
-  licenseNumber: "KY Master Electrician License #ME00000", // CONFIRM — required by KY law on advertising
-  insuranceNote: "Licensed, bonded, and fully insured in the Commonwealth of Kentucky.", // CONFIRM
+  /**
+   * CLAIMS THAT NEED DOCUMENTARY PROOF.
+   *
+   * Everything here is null/false until someone confirms it with the actual
+   * credential in hand. The site is built to OMIT these claims entirely when
+   * unset — it never prints a placeholder license number or an unverified
+   * "licensed and insured" badge.
+   *
+   * This matters legally, not just cosmetically. KRS 227A requires the real
+   * license number on electrical contractor advertising, and an unsupported
+   * "bonded and insured" claim is a deceptive trade practice. A site that
+   * says less is fine; a site that says something false is a liability.
+   */
+  credentials: {
+    /** The real KY electrical contractor / master electrician license number. */
+    licenseNumber: null as string | null,
+    /** Set true only when you can produce a current certificate of insurance. */
+    insured: false as boolean,
+    /** Set true only if actually bonded. These are different things. */
+    bonded: false as boolean,
+  },
 
   social: {
     instagram: "https://www.instagram.com/nors_electric/", // VERIFIED
@@ -67,8 +124,8 @@ export const site = {
   // ---- Trust signals ---------------------------------------------------- //
   valueProps: [
     {
-      title: "Licensed & insured",
-      body: "Kentucky-licensed electricians. Every job is permitted and inspected where the code requires it.",
+      title: "Permitted and inspected",
+      body: "Every job is permitted and met with the inspector where the code requires it — not quietly skipped to save a day.",
     },
     {
       title: "Upfront pricing",
@@ -568,9 +625,9 @@ export const serviceArea = {
   ],
 } as const;
 
-// ---- Process ------------------------------------------------------------ //
+// ---- Booking process ------------------------------------------------------------ //
 
-export const process = [
+export const bookingProcess = [
   {
     step: "1",
     title: "Tell us what is going on",
@@ -594,34 +651,37 @@ export const process = [
 ] as const;
 
 // ---- Testimonials ------------------------------------------------------- //
-// PLACEHOLDER — replace with real, attributable reviews before launch.
-// Do not publish invented testimonials.
 
-export const testimonialsArePlaceholder = true;
+/**
+ * REAL REVIEWS ONLY. This array is empty on purpose.
+ *
+ * Every testimonial section on the site hides itself when this is empty, so
+ * the site can ship today without ever publishing a fabricated review.
+ * Inventing testimonials violates the FTC Act (16 CFR Part 465, which since
+ * 2024 carries civil penalties per violation) and Kentucky's Consumer
+ * Protection Act.
+ *
+ * To add real ones, paste them in this shape — first name, town, and the job
+ * performed convert far better than anonymous quotes:
+ *
+ *   {
+ *     quote: "Exactly what they said it would cost, and they labeled the panel.",
+ *     name: "Sarah T.",
+ *     location: "Benton, KY",
+ *     service: "Panel upgrade",
+ *   },
+ *
+ * Only publish a review the customer actually wrote. Screenshots from the
+ * Google or Facebook listing are the easiest source, and you may quote a
+ * public review verbatim with attribution.
+ */
+export const testimonials: {
+  quote: string;
+  name: string;
+  location: string;
+  service: string;
+}[] = [];
 
-export const testimonials = [
-  {
-    quote:
-      "Replace this with a real review from Google, Facebook, or a customer who has given written permission to be quoted.",
-    name: "Customer name",
-    location: "Murray, KY",
-    service: "Panel upgrade",
-  },
-  {
-    quote:
-      "Replace this with a real review. Reviews with a first name, a town, and the job performed convert far better than anonymous quotes.",
-    name: "Customer name",
-    location: "Benton, KY",
-    service: "Generator installation",
-  },
-  {
-    quote:
-      "Replace this with a real review. Ask for one at the end of every job — a card with a QR code to the Google listing works well.",
-    name: "Customer name",
-    location: "Hazel, KY",
-    service: "Commercial lighting",
-  },
-] as const;
 
 // ---- General FAQ --------------------------------------------------------- //
 
