@@ -21,8 +21,33 @@ export type StoredLead = Omit<LeadInput, "company" | "consent"> & {
   status: "new";
 };
 
-const DATA_DIR = process.env.LEADS_DATA_DIR || path.join(process.cwd(), "data");
+/**
+ * Where leads.jsonl lives.
+ *
+ * On Vercel (and most serverless platforms) the deployment filesystem is
+ * READ-ONLY apart from /tmp — writing to process.cwd() throws EROFS, which
+ * would fail every single submission. So we fall back to /tmp there: still
+ * ephemeral, but writable, which keeps the write a working safety net rather
+ * than a guaranteed error. Durable storage is the notification email and the
+ * CRM webhook; set LEADS_DATA_DIR to a mounted volume when self-hosting.
+ */
+const DATA_DIR =
+  process.env.LEADS_DATA_DIR ||
+  (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
+    ? "/tmp/nors-leads"
+    : path.join(process.cwd(), "data"));
+
 const LEADS_FILE = path.join(DATA_DIR, "leads.jsonl");
+
+/** True when at least one durable destination is configured. */
+export function hasDurableDestination(): boolean {
+  const email = Boolean(
+    process.env.RESEND_API_KEY &&
+      process.env.LEAD_NOTIFICATION_EMAIL &&
+      process.env.LEAD_FROM_EMAIL,
+  );
+  return email || Boolean(process.env.LEAD_WEBHOOK_URL);
+}
 
 /**
  * Appends the lead to a newline-delimited JSON file.

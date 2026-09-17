@@ -5,6 +5,7 @@ import {
   notifyNewLead,
   rateLimit,
   newLeadId,
+  hasDurableDestination,
   type StoredLead,
 } from "@/lib/leads";
 
@@ -84,6 +85,17 @@ export async function POST(req: NextRequest) {
   }
 
   await notifyNewLead(lead);
+
+  // Loud warning for a deploy where nothing durable is configured. On a
+  // serverless host the file write above does not survive the deploy, so this
+  // lead exists nowhere the office will ever see it.
+  if (!hasDurableDestination()) {
+    console.error(
+      `[leads] ${lead.id} was accepted but NO notification destination is ` +
+        `configured. Set RESEND_API_KEY + LEAD_NOTIFICATION_EMAIL + ` +
+        `LEAD_FROM_EMAIL, or LEAD_WEBHOOK_URL, or this lead is lost.`,
+    );
+  }
 
   return NextResponse.json({ ok: true, reference: lead.id });
 }

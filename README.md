@@ -184,16 +184,53 @@ and add the Google review link to `/reviews`.
 
 ---
 
-## Deploying
+## Deploying to Vercel
 
-Standard Next.js. Vercel is the least-effort option:
+The build is Vercel-ready and `vercel.json` is committed (framework preset,
+`iad1` region — closest to Kentucky — security headers, and `noindex` on
+`/admin`).
 
-1. Push this repo, import it in Vercel
-2. Add the environment variables from `.env.example`
-3. Point the domain, and set `site.url` to match
+### Steps
 
-Any Node host works too — `npm run build && npm start`. If you self-host,
-mount a volume and set `LEADS_DATA_DIR` so the lead file persists.
+1. Push this code to a GitHub repo.
+2. At [vercel.com/new](https://vercel.com/new), import that repo. Vercel
+   detects Next.js; leave the build settings alone.
+3. **Add the environment variables below before the first deploy.**
+4. Deploy, then add your domain under Settings → Domains.
+5. Set `site.url` in `src/content/site.ts` to the final domain and redeploy —
+   canonical URLs, `sitemap.xml`, and the JSON-LD schema all derive from it.
+
+### ⚠️ Environment variables are not optional on Vercel
+
+Locally, a submitted lead is written to `data/leads.jsonl` and you can read it
+back at `/admin/leads`. **On Vercel that file is gone on the next deploy**, and
+`/admin/leads` will always look empty.
+
+So on Vercel you must set **at least one** durable destination, or leads are
+accepted and then silently lost:
+
+| Variable | Why |
+| --- | --- |
+| `RESEND_API_KEY` + `LEAD_NOTIFICATION_EMAIL` + `LEAD_FROM_EMAIL` | Emails each lead to the office. The usual choice. |
+| `LEAD_WEBHOOK_URL` | POSTs each lead to Zapier / Make / Jobber / Housecall Pro. |
+| `ADMIN_USER` + `ADMIN_PASSWORD` | Unlocks `/admin/leads`. Unset = the route 404s (fails closed). |
+
+The API route logs a loud `[leads] ... NO notification destination is
+configured` error to your Vercel function logs if a lead arrives with neither
+set. Check the logs after your first test submission.
+
+### Test it after deploying
+
+Submit a real request through `/request-service` on the live domain and confirm
+the notification email actually arrives. Do this before you point the domain at
+it or hand the site over — it is the one failure mode that looks fine from the
+outside while losing every customer who fills in the form.
+
+### Self-hosting instead
+
+Any Node host works: `npm run build && npm start`. Mount a volume and set
+`LEADS_DATA_DIR` to it — then `data/leads.jsonl` is durable and `/admin/leads`
+is a real inbox.
 
 ---
 
